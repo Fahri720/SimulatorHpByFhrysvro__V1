@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iPhone 15 Pro Max - Final Edition</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --ios-blue: #007aff; --ios-bg: #f2f2f7; --ios-card: rgba(255, 255, 255, 0.9);
+            --ios-text: #000000; --dock-bg: rgba(255, 255, 255, 0.4);
+            --wallpaper: url('https://images.unsplash.com/photo-1620206343767-7da98185edd4?q=80&w=1000');
+        }
+        .dark-mode {
+            --ios-bg: #000000; --ios-card: rgba(28, 28, 30, 0.9);
+            --ios-text: #ffffff; --dock-bg: rgba(44, 44, 46, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; user-select: none; outline: none; }
+        body { background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+
+        #phone-wrapper { transition: transform 0.3s ease; display: flex; justify-content: center; align-items: center; }
+        .phone {
+            width: 393px; height: 852px; border-radius: 55px; background: #000;
+            position: relative; border: 9px solid #2c2c2c; overflow: hidden;
+            box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+        }
+
+        /* SYSTEM COMPONENTS */
+        .dynamic-island {
+            position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+            width: 125px; height: 37px; background: #000; border-radius: 22px; z-index: 9999;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; pointer-events: none;
+        }
+        .dynamic-island.active { width: 300px; height: 50px; font-size: 14px; }
+
+        .status-bar {
+            position: absolute; top: 15px; width: 100%; padding: 0 35px;
+            display: flex; justify-content: space-between; align-items: center;
+            color: white; font-size: 13px; font-weight: 600; z-index: 9000;
+        }
+
+        .layer { position: absolute; inset: 0; transition: transform 0.6s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s; }
+        .hidden { pointer-events: none; opacity: 0; transform: scale(1.1); }
+
+        /* HOME SCREEN */
+        #home-screen { background: var(--wallpaper) center/cover; padding: 100px 25px; z-index: 500; }
+        .home-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px 15px; }
+        .app-icon { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .app-icon:active { transform: scale(0.9); }
+        .icon-box { width: 62px; height: 62px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .app-label { color: white; font-size: 11px; font-weight: 500; }
+
+        /* APP WINDOWS */
+        .app-window {
+            position: absolute; inset: 0; background: var(--ios-bg); z-index: 8000;
+            transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.3, 1, 0.3, 1);
+            display: flex; flex-direction: column; color: var(--ios-text);
+        }
+        .app-window.active { transform: translateY(0); }
+        .app-header { padding: 60px 20px 15px; display: flex; justify-content: space-between; align-items: center; background: var(--ios-card); backdrop-filter: blur(20px); }
+        .btn-link { color: var(--ios-blue); border: none; background: none; font-size: 16px; cursor: pointer; }
+
+        /* CALC */
+        .calc-screen { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; padding: 30px; font-size: 60px; font-weight: 200; background: #000; color: #fff; }
+        .calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px; background: #000; }
+        .c-btn { width: 75px; height: 75px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; }
+        .c-num { background: #333; color: white; }
+        .c-op { background: #ff9f0a; color: white; }
+        .c-fn { background: #a5a5a5; color: black; }
+        .c-op.active { background: #fff; color: #ff9f0a; }
+
+        /* GALLERY */
+        .gallery-content { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; overflow-y: auto; }
+        .photo { aspect-ratio: 1/1; background-size: cover; cursor: pointer; }
+        #photo-view { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; align-items: center; justify-content: center; }
+        #photo-view img { max-width: 100%; }
+
+        /* MUSIC */
+        .music-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background: linear-gradient(to bottom, #444, #000); color: white; }
+        .album-art { width: 250px; height: 250px; border-radius: 20px; background: linear-gradient(45deg, #ff416c, #ff4b2b); box-shadow: 0 20px 40px rgba(0,0,0,0.5); margin-bottom: 30px; transition: 0.5s; }
+        .album-art.playing { transform: scale(1.05); animation: rotate 20s linear infinite; border-radius: 50%; }
+        @keyframes rotate { from { transform: rotate(0deg) scale(1.05); } to { transform: rotate(360deg) scale(1.05); } }
+        .prog-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.2); margin: 30px 0; border-radius: 2px; }
+        #prog-fill { width: 0%; height: 100%; background: #fff; border-radius: 2px; }
+
+        .home-bar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 130px; height: 5px; background: #fff; border-radius: 10px; z-index: 10000; cursor: pointer; }
+        .app-window .home-bar { background: var(--ios-text); opacity: 0.3; }
+    </style>
+</head>
+<body id="main-body">
+
+<div id="phone-wrapper">
+    <div class="phone">
+        <div class="status-bar">
+            <span id="clock-time">09:41</span>
+            <div style="display:flex; gap:5px;"><i data-lucide="signal" size="14"></i><i data-lucide="wifi" size="14"></i><i data-lucide="battery" size="16"></i></div>
+        </div>
+        <div class="dynamic-island" id="island"></div>
+        <div class="home-bar" onclick="closeAllApps()"></div>
+
+        <div id="lock-screen" class="layer" style="background:var(--wallpaper) center/cover; z-index:2000; display:flex; flex-direction:column; align-items:center; padding-top:100px;">
+            <div style="position:absolute; inset:0;" onclick="unlock()"></div>
+            <h1 id="lock-time" style="color:white; font-size:80px; font-weight:700;">09:41</h1>
+            <p style="color:white; font-size:20px;">Kamis, 9 April</p>
+            <p style="margin-top:auto; margin-bottom:50px; color:white; opacity:0.6;">Tap to Open</p>
+        </div>
+
+        <div id="home-screen" class="layer hidden">
+            <div class="home-grid">
+                <div class="app-icon" onclick="openApp('calc')"><div class="icon-box" style="background:#ff9f0a"><i data-lucide="calculator" color="white"></i></div><span class="app-label">Calculator</span></div>
+                <div class="app-icon" onclick="openApp('gallery')"><div class="icon-box" style="background:white"><i data-lucide="image" color="#007aff"></i></div><span class="app-label">Photos</span></div>
+                <div class="app-icon" onclick="openApp('notes')"><div class="icon-box" style="background:#fffb00"><i data-lucide="edit-3" color="#333"></i></div><span class="app-label">Notes</span></div>
+                <div class="app-icon" onclick="openApp('music')"><div class="icon-box" style="background:linear-gradient(#ff4b2b, #ff416c)"><i data-lucide="music" color="white"></i></div><span class="app-label">Music</span></div>
+                <div class="app-icon" onclick="openApp('settings')"><div class="icon-box" style="background:#8e8e93"><i data-lucide="settings" color="white"></i></div><span class="app-label">Settings</span></div>
+                <div class="app-icon" onclick="openApp('camera')"><div class="icon-box" style="background:#222"><i data-lucide="camera" color="white"></i></div><span class="app-label">Camera</span></div>
+            </div>
+        </div>
+
+        <div id="app-calc" class="app-window">
+            <div class="calc-screen" id="calc-display">0</div>
+            <div class="calc-keys">
+                <button class="c-btn c-fn" onclick="cInput('AC')">AC</button><button class="c-btn c-fn">+/-</button><button class="c-btn c-fn" onclick="cInput('%')">%</button><button class="c-btn c-op" onclick="cOp('/')">÷</button>
+                <button class="c-btn c-num" onclick="cInput('7')">7</button><button class="c-btn c-num" onclick="cInput('8')">8</button><button class="c-btn c-num" onclick="cInput('9')">9</button><button class="c-btn c-op" onclick="cOp('*')">×</button>
+                <button class="c-btn c-num" onclick="cInput('4')">4</button><button class="c-btn c-num" onclick="cInput('5')">5</button><button class="c-btn c-num" onclick="cInput('6')">6</button><button class="c-btn c-op" onclick="cOp('-')">-</button>
+                <button class="c-btn c-num" onclick="cInput('1')">1</button><button class="c-btn c-num" onclick="cInput('2')">2</button><button class="c-btn c-num" onclick="cInput('3')">3</button><button class="c-btn c-op" onclick="cOp('+')">+</button>
+                <button class="c-btn c-num" style="grid-column: span 2; width:162px; border-radius:40px;" onclick="cInput('0')">0</button><button class="c-btn c-num" onclick="cInput('.')">.</button><button class="c-btn c-op" onclick="cResult()">=</button>
+            </div>
+        </div>
+
+        <div id="app-gallery" class="app-window">
+            <div class="app-header"><div></div><b>Library</b><i data-lucide="search" size="20"></i></div>
+            <div class="gallery-content">
+                <div class="photo" style="background-image:url('https://picsum.photos/400/400?random=1')" onclick="viewPhoto(this)"></div>
+                <div class="photo" style="background-image:url('https://picsum.photos/400/400?random=2')" onclick="viewPhoto(this)"></div>
+                <div class="photo" style="background-image:url('https://picsum.photos/400/400?random=3')" onclick="viewPhoto(this)"></div>
+                <div class="photo" style="background-image:url('https://picsum.photos/400/400?random=4')" onclick="viewPhoto(this)"></div>
+                <div class="photo" style="background-image:url('https://picsum.photos/400/400?random=5')" onclick="viewPhoto(this)"></div>
+                <div class="photo" style="background-image:url('https://picsum.photos/400/400?random=6')" onclick="viewPhoto(this)"></div>
+            </div>
+        </div>
+
+        <div id="app-notes" class="app-window">
+            <div class="app-header"><button class="btn-link" onclick="saveNote()">Done</button><b>Notes</b><i data-lucide="share" class="btn-link" size="20"></i></div>
+            <textarea id="note-input" style="flex:1; border:none; padding:20px; background:transparent; color:var(--ios-text); font-size:18px;" placeholder="Tulis sesuatu..."></textarea>
+        </div>
+
+        <div id="app-music" class="app-window">
+            <div class="music-body">
+                <div id="art" class="album-art"></div>
+                <h2>Cyber Beats</h2>
+                <p style="opacity:0.6">Future Artist</p>
+                <div class="prog-bar"><div id="prog-fill"></div></div>
+                <div style="display:flex; gap:40px; align-items:center;">
+                    <i data-lucide="skip-back" fill="white"></i>
+                    <div onclick="toggleMusic()"><i data-lucide="play" id="m-icon" size="48" fill="white"></i></div>
+                    <i data-lucide="skip-forward" fill="white"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="app-settings" class="app-window">
+            <div class="app-header"><div></div><b>Settings</b><div></div></div>
+            <div style="padding:20px;">
+                <div style="background:var(--ios-card); border-radius:12px; padding:15px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>Dark Mode</span>
+                    <input type="checkbox" onchange="toggleDark(this)" id="dark-toggle">
+                </div>
+            </div>
+        </div>
+
+        <div id="app-camera" class="app-window" style="background:#000;">
+            <video id="cam-v" autoplay playsinline style="width:100%; height:80%; object-fit:cover; margin-top:40px;"></video>
+            <div style="height:20%; display:flex; justify-content:center; align-items:center;">
+                <div onclick="snap()" style="width:70px; height:70px; border:4px solid white; border-radius:50%; padding:5px;"><div style="width:100%; height:100%; background:white; border-radius:50%;"></div></div>
+            </div>
+        </div>
+
+        <div id="photo-view" onclick="this.style.display='none'"><img id="big-img"></div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+    
+    // NAVIGATION & SYSTEM
+    function adjust() {
+        const s = Math.min(window.innerHeight / 900, window.innerWidth / 450, 1);
+        document.getElementById('phone-wrapper').style.transform = `scale(${s})`;
+    }
+    window.onresize = adjust; adjust();
+
+    function updateTime() {
+        const d = new Date();
+        const t = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0');
+        document.getElementById('clock-time').innerText = t;
+        document.getElementById('lock-time').innerText = t;
+    }
+    setInterval(updateTime, 1000); updateTime();
+
+    function unlock() {
+        document.getElementById('lock-screen').style.transform = "translateY(-100%)";
+        document.getElementById('home-screen').classList.remove('hidden');
+        notify("FaceID Berhasil 🔓");
+    }
+
+    function openApp(id) {
+        document.getElementById('app-'+id).classList.add('active');
+        if(id === 'camera') startCam();
+    }
+
+    function closeAllApps() {
+        document.querySelectorAll('.app-window').forEach(w => w.classList.remove('active'));
+        stopCam();
+    }
+
+    function notify(txt) {
+        const i = document.getElementById('island');
+        i.innerText = txt; i.classList.add('active');
+        setTimeout(() => { i.classList.remove('active'); i.innerText = ""; }, 2000);
+    }
+
+    // CALC LOGIC
+    let cExpr = "";
+    function cInput(v) {
+        if(v === 'AC') cExpr = "";
+        else if(v === '%') cExpr = (eval(cExpr)/100).toString();
+        else cExpr += v;
+        document.getElementById('calc-display').innerText = cExpr || "0";
+    }
+    function cOp(o) { cExpr += o; document.getElementById('calc-display').innerText = cExpr; }
+    function cResult() {
+        try { cExpr = eval(cExpr).toString(); document.getElementById('calc-display').innerText = cExpr; }
+        catch { cExpr = ""; document.getElementById('calc-display').innerText = "Error"; }
+    }
+
+    // GALLERY
+    function viewPhoto(el) {
+        const v = document.getElementById('photo-view');
+        const img = document.getElementById('big-img');
+        img.src = el.style.backgroundImage.slice(5, -2);
+        v.style.display = 'flex';
+    }
+
+    // NOTES
+    function saveNote() {
+        const txt = document.getElementById('note-input').value;
+        if(txt) notify("Catatan Tersimpan ✅");
+        closeAllApps();
+    }
+
+    // MUSIC
+    let isPlaying = false;
+    let musicInt;
+    function toggleMusic() {
+        isPlaying = !isPlaying;
+        const icon = document.getElementById('m-icon');
+        const art = document.getElementById('art');
+        const fill = document.getElementById('prog-fill');
+        
+        if(isPlaying) {
+            icon.setAttribute("data-lucide", "pause");
+            art.classList.add('playing');
+            let p = 0;
+            musicInt = setInterval(() => { p += 0.5; fill.style.width = p + "%"; if(p>=100) p=0; }, 100);
+            notify("Memutar Musik 🎵");
+        } else {
+            icon.setAttribute("data-lucide", "play");
+            art.classList.remove('playing');
+            clearInterval(musicInt);
+        }
+        lucide.createIcons();
+    }
+
+    // SETTINGS
+    function toggleDark(el) {
+        document.getElementById('main-body').classList.toggle('dark-mode', el.checked);
+        notify(el.checked ? "Dark Mode On 🌙" : "Light Mode On ☀️");
+    }
+
+    // CAMERA
+    let stream;
+    async function startCam() {
+        try { stream = await navigator.mediaDevices.getUserMedia({video:true}); document.getElementById('cam-v').srcObject = stream; }
+        catch(e) { notify("Akses Kamera Gagal"); }
+    }
+    function stopCam() { if(stream) stream.getTracks().forEach(t => t.stop()); }
+    function snap() { notify("Foto Disimpan 📸"); }
+</script>
+</body>
+</html>
